@@ -53,11 +53,11 @@ exports.register = async (req, res) => {
       role
     });
 
-    try {
-      await sendWelcomeEmail(user);
-    } catch (emailError) {
-      console.log('Email send failed:', emailError.message);
-    }
+    //try {
+    // await sendWelcomeEmail(user);
+    // } catch (emailError) {
+    // console.log('Email send failed:', emailError.message);
+    //}
 
     const token = generateToken(user);
 
@@ -74,10 +74,13 @@ exports.register = async (req, res) => {
       }
     });
 
-  } catch (error) {
+  }
+  catch (error) {
+    console.error("REGISTER ERROR:", error);
+
     return res.status(500).json({
       error: true,
-      message: 'Registration failed.',
+      message: "Registration failed.",
       data: error.message
     });
   }
