@@ -60,7 +60,7 @@ exports.updateProfileImage = async (req, res) => {
 
     user.profile_image = `/uploads/profile/${req.file.filename}`;
     await user.save();
-
+    
     return res.status(200).json({
       error: false,
       message: 'Profile image updated successfully.',
