@@ -3,7 +3,9 @@ const jwt = require('jsonwebtoken');
 const { User } = require('../models');
 const { sendWelcomeEmail } = require('../services/emailService');
 
+// ==========================
 // Generate JWT Token
+// ==========================
 const generateToken = (user) => {
   return jwt.sign(
     {
@@ -40,7 +42,7 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Check Existing User
+    // Check Existing Email
     const existingUser = await User.findOne({
       where: { email }
     });
@@ -64,17 +66,11 @@ exports.register = async (req, res) => {
       role
     });
 
-    // Send Welcome Email (Optional)
-    try {
-      await sendWelcomeEmail(user);
-    } catch (emailError) {
-      console.log('Email send failed:', emailError.message);
-    }
-
     // Generate Token
     const token = generateToken(user);
 
-    return res.status(201).json({
+    // Send Response Immediately
+    res.status(201).json({
       error: false,
       message: 'Registration successful.',
       token,
@@ -87,15 +83,22 @@ exports.register = async (req, res) => {
       }
     });
 
-  } catch (error) {
+    // Send Welcome Email in Background
+    sendWelcomeEmail(user)
+      .then(() => {
+        console.log(`✅ Welcome email sent to ${user.email}`);
+      })
+      .catch((err) => {
+        console.log('❌ Email Error:', err.message);
+      });
 
-    console.log("REGISTER ERROR:", error);
+  } catch (error) {
+    console.log('REGISTER ERROR:', error);
 
     return res.status(500).json({
       error: true,
       message: 'Registration failed.'
     });
-
   }
 };
 
@@ -103,11 +106,11 @@ exports.register = async (req, res) => {
 // Login User
 // ==========================
 exports.login = async (req, res) => {
-
   try {
 
     const { email, password } = req.body;
 
+    // Validation
     if (!email || !password) {
       return res.status(400).json({
         error: true,
@@ -155,7 +158,7 @@ exports.login = async (req, res) => {
 
   } catch (error) {
 
-    console.log("LOGIN ERROR:", error);
+    console.log('LOGIN ERROR:', error);
 
     return res.status(500).json({
       error: true,
@@ -163,5 +166,4 @@ exports.login = async (req, res) => {
     });
 
   }
-
 };
