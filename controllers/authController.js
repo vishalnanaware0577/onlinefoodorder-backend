@@ -3,23 +3,28 @@ const jwt = require('jsonwebtoken');
 const { User } = require('../models');
 const { sendWelcomeEmail } = require('../services/emailService');
 
+// Generate JWT Token
 const generateToken = (user) => {
   return jwt.sign(
     {
       user_id: user.user_id,
-      role: user.role,
+      role: user.role
     },
     process.env.JWT_SECRET,
     {
-      expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+      expiresIn: process.env.JWT_EXPIRES_IN || '7d'
     }
   );
 };
 
+// ==========================
+// Register User
+// ==========================
 exports.register = async (req, res) => {
   try {
     const { name, email, mobile, password, role } = req.body;
 
+    // Validation
     if (!name || !email || !mobile || !password || !role) {
       return res.status(400).json({
         error: true,
@@ -27,6 +32,7 @@ exports.register = async (req, res) => {
       });
     }
 
+    // Role Validation
     if (!['customer', 'hotel_owner', 'delivery_partner'].includes(role)) {
       return res.status(400).json({
         error: true,
@@ -34,7 +40,10 @@ exports.register = async (req, res) => {
       });
     }
 
-    const existingUser = await User.findOne({ where: { email } });
+    // Check Existing User
+    const existingUser = await User.findOne({
+      where: { email }
+    });
 
     if (existingUser) {
       return res.status(409).json({
@@ -43,8 +52,10 @@ exports.register = async (req, res) => {
       });
     }
 
+    // Hash Password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Create User
     const user = await User.create({
       name,
       email,
@@ -53,12 +64,14 @@ exports.register = async (req, res) => {
       role
     });
 
-    //try {
-    // await sendWelcomeEmail(user);
-    // } catch (emailError) {
-    // console.log('Email send failed:', emailError.message);
-    //}
+    // Send Welcome Email (Optional)
+    try {
+      await sendWelcomeEmail(user);
+    } catch (emailError) {
+      console.log('Email send failed:', emailError.message);
+    }
 
+    // Generate Token
     const token = generateToken(user);
 
     return res.status(201).json({
@@ -74,20 +87,25 @@ exports.register = async (req, res) => {
       }
     });
 
-  }
-  catch (error) {
-    console.error("REGISTER ERROR:", error);
+  } catch (error) {
+
+    console.log("REGISTER ERROR:", error);
 
     return res.status(500).json({
       error: true,
-      message: "Registration failed.",
-      data: error.message
+      message: 'Registration failed.'
     });
+
   }
 };
 
+// ==========================
+// Login User
+// ==========================
 exports.login = async (req, res) => {
+
   try {
+
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -97,7 +115,10 @@ exports.login = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ where: { email } });
+    // Find User
+    const user = await User.findOne({
+      where: { email }
+    });
 
     if (!user) {
       return res.status(404).json({
@@ -106,6 +127,7 @@ exports.login = async (req, res) => {
       });
     }
 
+    // Compare Password
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -115,6 +137,7 @@ exports.login = async (req, res) => {
       });
     }
 
+    // Generate Token
     const token = generateToken(user);
 
     return res.status(200).json({
@@ -131,10 +154,14 @@ exports.login = async (req, res) => {
     });
 
   } catch (error) {
+
+    console.log("LOGIN ERROR:", error);
+
     return res.status(500).json({
       error: true,
-      message: 'Login failed.',
-      data: error.message
+      message: 'Login failed.'
     });
+
   }
+
 };
