@@ -89,10 +89,15 @@ exports.register = async (req, res) => {
         console.log(`✅ Welcome email sent successfully to ${user.email}`);
       })
       .catch((err) => {
-        console.error(`❌ Failed to send welcome email to ${user.email}`);
-        console.error(err.message);
-      });
+        console.log("❌ Failed to send welcome email");
 
+        if (err.response) {
+          console.log(err.response.status);
+          console.log(err.response.data);
+        } else {
+          console.log(err.message);
+        }
+      });
   } catch (error) {
     console.error('REGISTER ERROR:', error);
 
