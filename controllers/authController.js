@@ -66,7 +66,7 @@ exports.register = async (req, res) => {
       role
     });
 
-    // Generate Token
+    // Generate JWT Token
     const token = generateToken(user);
 
     // Send Response Immediately
@@ -86,14 +86,15 @@ exports.register = async (req, res) => {
     // Send Welcome Email in Background
     sendWelcomeEmail(user)
       .then(() => {
-        console.log(`✅ Welcome email sent to ${user.email}`);
+        console.log(`✅ Welcome email sent successfully to ${user.email}`);
       })
       .catch((err) => {
-        console.log('❌ Email Error:', err.message);
+        console.error(`❌ Failed to send welcome email to ${user.email}`);
+        console.error(err.message);
       });
 
   } catch (error) {
-    console.log('REGISTER ERROR:', error);
+    console.error('REGISTER ERROR:', error);
 
     return res.status(500).json({
       error: true,
@@ -110,7 +111,6 @@ exports.login = async (req, res) => {
 
     const { email, password } = req.body;
 
-    // Validation
     if (!email || !password) {
       return res.status(400).json({
         error: true,
@@ -118,7 +118,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Find User
     const user = await User.findOne({
       where: { email }
     });
@@ -130,7 +129,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Compare Password
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -140,7 +138,6 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Generate Token
     const token = generateToken(user);
 
     return res.status(200).json({
@@ -158,7 +155,7 @@ exports.login = async (req, res) => {
 
   } catch (error) {
 
-    console.log('LOGIN ERROR:', error);
+    console.error('LOGIN ERROR:', error);
 
     return res.status(500).json({
       error: true,
