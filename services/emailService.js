@@ -2,22 +2,22 @@ const transporter = require('../config/email');
 
 const sendWelcomeEmail = async (user) => {
 
-    const currentDate = new Date();
+  const currentDate = new Date();
 
-    const date = currentDate.toLocaleDateString('en-IN');
+  const date = currentDate.toLocaleDateString('en-IN');
 
-    const time = currentDate.toLocaleTimeString('en-IN');
+  const time = currentDate.toLocaleTimeString('en-IN');
 
-    let subject = "";
-    let html = "";
+  let subject = "";
+  let html = "";
 
-    switch (user.role) {
+  switch (user.role) {
 
-        case "customer":
+    case "customer":
 
-            subject = "🍕 Welcome to Online Food Ordering System";
+      subject = "🍕 Welcome to Online Food Ordering System";
 
-            html = `
+      html = `
             <div style="font-family:Arial;padding:25px;background:#f4f4f4;">
 
             <div style="max-width:700px;margin:auto;background:#fff;border-radius:10px;padding:30px">
@@ -72,13 +72,13 @@ const sendWelcomeEmail = async (user) => {
             </div>
             `;
 
-        break;
+      break;
 
-        case "restaurant_owner":
+    case "restaurant_owner":
 
-            subject="🏨 Welcome Restaurant Owner";
+      subject = "🏨 Welcome Restaurant Owner";
 
-            html=`
+      html = `
             <div style="font-family:Arial;padding:25px;background:#f5f5f5">
 
             <div style="max-width:700px;background:white;padding:30px;border-radius:10px;margin:auto">
@@ -132,13 +132,13 @@ const sendWelcomeEmail = async (user) => {
             </div>
             `;
 
-        break;
+      break;
 
-        case "delivery_partner":
+    case "delivery_partner":
 
-            subject="🚚 Welcome Delivery Partner";
+      subject = "🚚 Welcome Delivery Partner";
 
-            html=`
+      html = `
             <div style="font-family:Arial;padding:25px;background:#f8f8f8">
 
             <div style="max-width:700px;background:white;padding:30px;border-radius:10px;margin:auto">
@@ -196,24 +196,19 @@ const sendWelcomeEmail = async (user) => {
             </div>
             `;
 
-        break;
+      break;
 
-    }
+  }
 
-    await transporter.sendMail({
-
-        from: `"Online Food Ordering" <${process.env.EMAIL_USER}>`,
-
-        to:user.email,
-
-        subject,
-
-        html
-
-    });
+  await transporter.sendMail({
+    from: `"Online Food Ordering" <${process.env.EMAIL_FROM}>`,
+    to: user.email,
+    subject: subject,
+    html: html
+  });
 
 }
 
-module.exports={
-    sendWelcomeEmail
+module.exports = {
+  sendWelcomeEmail
 }
