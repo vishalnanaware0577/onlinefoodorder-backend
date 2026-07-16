@@ -77,15 +77,15 @@ const sendWelcomeEmail = async (user) => {
     }
 
     await resend.emails.send({
-
         from: `Online Food Ordering <${process.env.EMAIL_FROM}>`,
-
         to: user.email,
-
         subject,
+        html,
+        text: `Hello ${user.name},
 
-        html
+Welcome to Online Food Ordering System.
 
+Enjoy delicious food!`
     });
 
     console.log("✅ Welcome Email Sent");
