@@ -84,19 +84,16 @@ exports.register = async (req, res) => {
     });
 
     // Send Welcome Email in Background
-    sendWelcomeEmail(user)
+    sendWelcomeEmail({
+      name: user.name,
+      email: user.email,
+      role: user.role
+    })
       .then(() => {
-        console.log(`✅ Welcome email sent successfully to ${user.email}`);
+        console.log("✅ Welcome Email Sent");
       })
       .catch((err) => {
-        console.log("❌ Failed to send welcome email");
-
-        if (err.response) {
-          console.log(err.response.status);
-          console.log(err.response.data);
-        } else {
-          console.log(err.message);
-        }
+        console.log("❌ Email Error:", err);
       });
   } catch (error) {
     console.error('REGISTER ERROR:', error);

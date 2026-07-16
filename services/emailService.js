@@ -1,130 +1,94 @@
-const axios = require("axios");
+const { Resend } = require("resend");
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendWelcomeEmail = async (user) => {
 
     let subject = "";
     let html = "";
 
-    if (user.role === "customer") {
+    switch (user.role) {
 
-        subject = "🍔 Welcome to Online Food Ordering";
+        case "customer":
 
-        html = `
-        <h2>Hello ${user.name}</h2>
+            subject = "🍔 Welcome to Online Food Ordering";
 
-        <p>Welcome to our Online Food Ordering Platform.</p>
+            html = `
+            <h2>Hello ${user.name} 👋</h2>
 
-        <h3>You can now</h3>
+            <p>Welcome to Online Food Ordering System.</p>
 
-        <ul>
-            <li>Browse Restaurants</li>
-            <li>Search Foods</li>
-            <li>Add to Cart</li>
-            <li>Wishlist</li>
-            <li>Track Orders</li>
-            <li>Secure Online Payments</li>
-        </ul>
+            <h3>You can now</h3>
 
-        <p>Enjoy Delicious Food 😊</p>
-        `;
+            <ul>
+                <li>🍕 Browse Restaurants</li>
+                <li>❤️ Add Wishlist</li>
+                <li>🛒 Add to Cart</li>
+                <li>💳 Online Payment</li>
+                <li>📦 Track Orders</li>
+                <li>⭐ Give Reviews</li>
+            </ul>
+
+            <p>Enjoy delicious food!</p>
+            `;
+
+            break;
+
+        case "hotel_owner":
+
+            subject = "🏨 Welcome Hotel Owner";
+
+            html = `
+            <h2>Hello ${user.name}</h2>
+
+            <p>Your Restaurant Partner account has been created successfully.</p>
+
+            <ul>
+                <li>🏨 Add Restaurant</li>
+                <li>🍔 Add Foods</li>
+                <li>📷 Upload Images</li>
+                <li>📦 Manage Orders</li>
+                <li>💰 View Earnings</li>
+            </ul>
+
+            <p>Thank you for joining us.</p>
+            `;
+
+            break;
+
+        default:
+
+            subject = "🚴 Welcome Delivery Partner";
+
+            html = `
+            <h2>Hello ${user.name}</h2>
+
+            <p>Your Delivery Partner account has been created.</p>
+
+            <ul>
+                <li>📦 Accept Orders</li>
+                <li>📍 Track Location</li>
+                <li>✅ Update Delivery Status</li>
+                <li>💰 Earn Money</li>
+            </ul>
+
+            <p>Happy Deliveries 🚀</p>
+            `;
     }
 
-    else if (user.role === "hotel_owner") {
+    await resend.emails.send({
 
-        subject = "🏨 Welcome Hotel Owner";
+        from: `Online Food Ordering <${process.env.EMAIL_FROM}>`,
 
-        html = `
-        <h2>Hello ${user.name}</h2>
+        to: user.email,
 
-        <p>Welcome to our Restaurant Partner Portal.</p>
+        subject,
 
-        <h3>You can now</h3>
+        html
 
-        <ul>
-
-            <li>Add Restaurant</li>
-
-            <li>Add Food Items</li>
-
-            <li>Upload Images</li>
-
-            <li>Manage Orders</li>
-
-            <li>Accept Orders</li>
-
-            <li>View Revenue</li>
-
-        </ul>
-
-        <p>Thank You for joining us.</p>
-        `;
-    }
-
-    else {
-
-        subject = "🚚 Welcome Delivery Partner";
-
-        html = `
-        <h2>Hello ${user.name}</h2>
-
-        <p>Welcome Delivery Partner.</p>
-
-        <ul>
-
-            <li>Accept Delivery Requests</li>
-
-            <li>Track Delivery</li>
-
-            <li>Update Order Status</li>
-
-            <li>Complete Deliveries</li>
-
-        </ul>
-
-        <p>Happy Deliveries 🚴</p>
-        `;
-    }
-
-    await axios.post(
-
-        "https://api.brevo.com/v3/smtp/email",
-
-        {
-
-            sender: {
-                email: process.env.EMAIL_FROM,
-                name: "Online Food Ordering"
-            },
-
-            to: [
-                {
-                    email: user.email,
-                    name: user.name
-                }
-            ],
-
-            subject,
-
-            htmlContent: html
-
-        },
-
-        {
-
-            headers: {
-
-                "api-key": process.env.BREVO_API_KEY,
-
-                "Content-Type": "application/json"
-
-            }
-
-        }
-
-    );
+    });
 
     console.log("✅ Welcome Email Sent");
-
 };
 
 module.exports = {
